@@ -43,6 +43,7 @@ import { IncompatibleAddOnsCheck } from "renderer/utils/IncompatibleAddOnsCheck"
 import { FreeDiskSpace, FreeDiskSpaceStatus } from "renderer/utils/FreeDiskSpace";
 import {ExclamationTriangle} from "react-bootstrap-icons";
 import {SentrySessionCard} from "renderer/components/SentrySessionCard";
+import { processFiles } from 'renderer/utils/PostProcessing';
 
 type FragmenterEventArguments<K extends keyof FragmenterInstallerEvents | keyof FragmenterContextEvents> = Parameters<(FragmenterInstallerEvents & FragmenterContextEvents)[K]>
 
@@ -602,6 +603,11 @@ export class InstallManager {
             console.log("Removing installs existing under alternative names");
             Directories.removeAlternativesForAddon(addon);
             console.log("Finished removing installs existing under alternative names");
+
+            this.setCurrentInstallState(addon, { status: InstallStatus.PostProcessing });
+            console.log("Start post processing of installed files");
+            await processFiles(addon.key, destDir);
+            console.log("Finished post processing of installed files");
 
             this.notifyDownload(addon, true);
 
